@@ -1,0 +1,485 @@
+openapi: 3.0.3
+info:
+  title: Hotel Service API
+  description: |
+    Microservicio de gestion de hoteles, departamentos y habitaciones.
+    **Responsable**: Integrante 2
+    **Rama Git**: feature/hotel-service
+  version: 1.0.0
+  contact:
+    name: Equipo Hotel
+
+servers:
+  - url: http://localhost:8082/api/v1
+    description: Local development
+  - url: http://hotel-service:8082/api/v1
+    description: Docker/K8s internal
+
+tags:
+  - name: departamentos
+    description: Gestion de departamentos/regiones
+  - name: hoteles
+    description: Gestion de hoteles
+  - name: habitaciones
+    description: Gestion de habitaciones
+  - name: tipos-habitacion
+    description: Tipos de habitacion
+
+paths:
+  # ==================== DEPARTAMENTOS ====================
+  /departamentos:
+    get:
+      tags: [departamentos]
+      summary: Listar todos los departamentos
+      operationId: listarDepartamentos
+      responses:
+        '200':
+          description: Lista de departamentos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DepartamentoResponse'
+
+    post:
+      tags: [departamentos]
+      summary: Crear departamento (admin)
+      operationId: crearDepartamento
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoRequest'
+      responses:
+        '201':
+          description: Departamento creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+
+  /departamentos/{id}:
+    get:
+      tags: [departamentos]
+      summary: Obtener departamento por ID
+      operationId: obtenerDepartamento
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Departamento encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '404':
+          description: No encontrado
+
+  # ==================== HOTELES ====================
+  /hoteles:
+    get:
+      tags: [hoteles]
+      summary: Listar todos los hoteles
+      operationId: listarHoteles
+      parameters:
+        - name: departamentoId
+          in: query
+          schema:
+            type: integer
+            format: int64
+          description: Filtrar por departamento
+      responses:
+        '200':
+          description: Lista de hoteles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HotelResponse'
+
+    post:
+      tags: [hoteles]
+      summary: Crear hotel (admin)
+      operationId: crearHotel
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelRequest'
+      responses:
+        '201':
+          description: Hotel creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelResponse'
+
+  /hoteles/{id}:
+    get:
+      tags: [hoteles]
+      summary: Obtener hotel por ID
+      operationId: obtenerHotel
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Hotel encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelDetalleResponse'
+        '404':
+          description: No encontrado
+
+    put:
+      tags: [hoteles]
+      summary: Actualizar hotel (admin)
+      operationId: actualizarHotel
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HotelRequest'
+      responses:
+        '200':
+          description: Hotel actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HotelResponse'
+
+    delete:
+      tags: [hoteles]
+      summary: Eliminar hotel (admin)
+      operationId: eliminarHotel
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Hotel eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
+  /hoteles/{id}/habitaciones:
+    get:
+      tags: [habitaciones]
+      summary: Listar habitaciones de un hotel
+      operationId: listarHabitacionesPorHotel
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Lista de habitaciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HabitacionResponse'
+
+  # ==================== HABITACIONES ====================
+  /habitaciones:
+    get:
+      tags: [habitaciones]
+      summary: Listar habitaciones disponibles
+      operationId: listarHabitacionesDisponibles
+      parameters:
+        - name: hotelId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Habitaciones disponibles
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitacionesDisponiblesResponse'
+
+    post:
+      tags: [habitaciones]
+      summary: Crear habitacion (admin)
+      operationId: crearHabitacion
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabitacionRequest'
+      responses:
+        '201':
+          description: Habitacion creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitacionResponse'
+
+  /habitaciones/{id}:
+    get:
+      tags: [habitaciones]
+      summary: Obtener habitacion por ID
+      operationId: obtenerHabitacion
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Habitacion encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitacionResponse'
+
+  /habitaciones/{id}/disponibilidad:
+    get:
+      tags: [habitaciones]
+      summary: Verificar disponibilidad de habitacion
+      operationId: verificarDisponibilidad
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+        - name: fechaInicio
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: fechaFin
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Estado de disponibilidad
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DisponibilidadResponse'
+
+  # ==================== TIPOS HABITACION ====================
+  /tipos-habitacion:
+    get:
+      tags: [tipos-habitacion]
+      summary: Listar tipos de habitacion
+      operationId: listarTiposHabitacion
+      responses:
+        '200':
+          description: Lista de tipos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TipoHabitacionResponse'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+
+  schemas:
+    DepartamentoRequest:
+      type: object
+      required: [nombre]
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+
+    DepartamentoResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+
+    HotelRequest:
+      type: object
+      required: [nombre, direccion, departamentoId]
+      properties:
+        nombre:
+          type: string
+          maxLength: 100
+        direccion:
+          type: string
+          maxLength: 200
+        descripcion:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+          format: email
+        departamentoId:
+          type: integer
+          format: int64
+
+    HotelResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        direccion:
+          type: string
+        descripcion:
+          type: string
+        telefono:
+          type: string
+        email:
+          type: string
+        departamento:
+          $ref: '#/components/schemas/DepartamentoResponse'
+
+    HotelDetalleResponse:
+      allOf:
+        - $ref: '#/components/schemas/HotelResponse'
+        - type: object
+          properties:
+            habitaciones:
+              type: array
+              items:
+                $ref: '#/components/schemas/HabitacionResponse'
+            precioMinimo:
+              type: number
+              format: double
+            precioMaximo:
+              type: number
+              format: double
+
+    HabitacionRequest:
+      type: object
+      required: [numero, precio, capacidad, hotelId, tipoHabitacionId]
+      properties:
+        numero:
+          type: string
+        precio:
+          type: number
+          format: double
+        capacidad:
+          type: integer
+        hotelId:
+          type: integer
+          format: int64
+        tipoHabitacionId:
+          type: integer
+          format: int64
+
+    HabitacionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        numero:
+          type: string
+        precio:
+          type: number
+          format: double
+        capacidad:
+          type: integer
+        tipoHabitacion:
+          $ref: '#/components/schemas/TipoHabitacionResponse'
+        hotelId:
+          type: integer
+          format: int64
+
+    HabitacionesDisponiblesResponse:
+      type: object
+      properties:
+        hotelId:
+          type: integer
+          format: int64
+        fechaInicio:
+          type: string
+          format: date
+        fechaFin:
+          type: string
+          format: date
+        habitaciones:
+          type: array
+          items:
+            $ref: '#/components/schemas/HabitacionResponse'
+
+    DisponibilidadResponse:
+      type: object
+      properties:
+        habitacionId:
+          type: integer
+          format: int64
+        disponible:
+          type: boolean
+        fechaInicio:
+          type: string
+          format: date
+        fechaFin:
+          type: string
+          format: date
+
+    TipoHabitacionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nombre:
+          type: string
+        descripcion:
+          type: string
+
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
