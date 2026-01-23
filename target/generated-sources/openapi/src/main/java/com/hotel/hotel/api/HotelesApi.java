@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import jakarta.annotation.Generated;
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-01-23T03:40:40.575624500-05:00[America/Lima]", comments = "Generator version: 7.6.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-01-23T10:30:14.501746300-05:00[America/Lima]", comments = "Generator version: 7.6.0")
 @Validated
 @Tag(name = "hoteles", description = "Gestion de hoteles")
 public interface HotelesApi {
@@ -78,7 +78,7 @@ public interface HotelesApi {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                    String exampleString = "{ \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\" }";
+                    String exampleString = "{ \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\", \"imagenUrl\" : \"imagenUrl\" }";
                     ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }
@@ -121,7 +121,7 @@ public interface HotelesApi {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                    String exampleString = "{ \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\" }";
+                    String exampleString = "{ \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\", \"imagenUrl\" : \"imagenUrl\" }";
                     ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }
@@ -202,7 +202,7 @@ public interface HotelesApi {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                    String exampleString = "[ { \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\" }, { \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\" } ]";
+                    String exampleString = "[ { \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\", \"imagenUrl\" : \"imagenUrl\" }, { \"descripcion\" : \"descripcion\", \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\", \"imagenUrl\" : \"imagenUrl\" } ]";
                     ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }
@@ -243,7 +243,7 @@ public interface HotelesApi {
         getRequest().ifPresent(request -> {
             for (MediaType mediaType: MediaType.parseMediaTypes(request.getHeader("Accept"))) {
                 if (mediaType.isCompatibleWith(MediaType.valueOf("application/json"))) {
-                    String exampleString = "{ \"descripcion\" : \"descripcion\", \"precioMinimo\" : 7.061401241503109, \"habitaciones\" : [ { \"precio\" : 1.4658129805029452, \"numero\" : \"numero\", \"id\" : 6, \"tipoHabitacion\" : { \"descripcion\" : \"descripcion\", \"id\" : 5, \"nombre\" : \"nombre\" }, \"hotelId\" : 2, \"capacidad\" : 5 }, { \"precio\" : 1.4658129805029452, \"numero\" : \"numero\", \"id\" : 6, \"tipoHabitacion\" : { \"descripcion\" : \"descripcion\", \"id\" : 5, \"nombre\" : \"nombre\" }, \"hotelId\" : 2, \"capacidad\" : 5 } ], \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\", \"precioMaximo\" : 9.301444243932576 }";
+                    String exampleString = "{ \"descripcion\" : \"descripcion\", \"precioMinimo\" : 7.061401241503109, \"habitaciones\" : [ { \"precio\" : 1.4658129805029452, \"numero\" : \"numero\", \"id\" : 6, \"tipoHabitacion\" : { \"descripcion\" : \"descripcion\", \"id\" : 5, \"nombre\" : \"nombre\" }, \"hotelId\" : 2, \"capacidad\" : 5 }, { \"precio\" : 1.4658129805029452, \"numero\" : \"numero\", \"id\" : 6, \"tipoHabitacion\" : { \"descripcion\" : \"descripcion\", \"id\" : 5, \"nombre\" : \"nombre\" }, \"hotelId\" : 2, \"capacidad\" : 5 } ], \"direccion\" : \"direccion\", \"departamento\" : { \"id\" : 0, \"nombre\" : \"nombre\" }, \"id\" : 0, \"telefono\" : \"telefono\", \"nombre\" : \"nombre\", \"email\" : \"email\", \"precioMaximo\" : 9.301444243932576, \"imagenUrl\" : \"imagenUrl\" }";
                     ApiUtil.setExampleResponse(request, "application/json", exampleString);
                     break;
                 }

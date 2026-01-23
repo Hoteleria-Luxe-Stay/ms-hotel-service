@@ -356,6 +356,9 @@ components:
         email:
           type: string
           format: email
+        imagenUrl:
+          type: string
+          description: URL de la imagen del hotel
         departamentoId:
           type: integer
           format: int64
@@ -376,6 +379,9 @@ components:
           type: string
         email:
           type: string
+        imagenUrl:
+          type: string
+          description: URL de la imagen del hotel
         departamento:
           $ref: '#/components/schemas/DepartamentoResponse'
 

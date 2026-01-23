@@ -19,7 +19,7 @@ import jakarta.annotation.Generated;
  * HotelResponse
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-01-23T03:40:40.575624500-05:00[America/Lima]", comments = "Generator version: 7.6.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-01-23T10:30:14.501746300-05:00[America/Lima]", comments = "Generator version: 7.6.0")
 public class HotelResponse {
 
   private Long id;
@@ -33,6 +33,8 @@ public class HotelResponse {
   private String telefono;
 
   private String email;
+
+  private String imagenUrl;
 
   private DepartamentoResponse departamento;
 
@@ -156,6 +158,26 @@ public class HotelResponse {
     this.email = email;
   }
 
+  public HotelResponse imagenUrl(String imagenUrl) {
+    this.imagenUrl = imagenUrl;
+    return this;
+  }
+
+  /**
+   * URL de la imagen del hotel
+   * @return imagenUrl
+  */
+  
+  @Schema(name = "imagenUrl", description = "URL de la imagen del hotel", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  @JsonProperty("imagenUrl")
+  public String getImagenUrl() {
+    return imagenUrl;
+  }
+
+  public void setImagenUrl(String imagenUrl) {
+    this.imagenUrl = imagenUrl;
+  }
+
   public HotelResponse departamento(DepartamentoResponse departamento) {
     this.departamento = departamento;
     return this;
@@ -191,12 +213,13 @@ public class HotelResponse {
         Objects.equals(this.descripcion, hotelResponse.descripcion) &&
         Objects.equals(this.telefono, hotelResponse.telefono) &&
         Objects.equals(this.email, hotelResponse.email) &&
+        Objects.equals(this.imagenUrl, hotelResponse.imagenUrl) &&
         Objects.equals(this.departamento, hotelResponse.departamento);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, nombre, direccion, descripcion, telefono, email, departamento);
+    return Objects.hash(id, nombre, direccion, descripcion, telefono, email, imagenUrl, departamento);
   }
 
   @Override
@@ -209,6 +232,7 @@ public class HotelResponse {
     sb.append("    descripcion: ").append(toIndentedString(descripcion)).append("\n");
     sb.append("    telefono: ").append(toIndentedString(telefono)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
+    sb.append("    imagenUrl: ").append(toIndentedString(imagenUrl)).append("\n");
     sb.append("    departamento: ").append(toIndentedString(departamento)).append("\n");
     sb.append("}");
     return sb.toString();

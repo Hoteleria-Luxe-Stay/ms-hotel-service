@@ -26,6 +26,7 @@ public class Hotel {
     private String descripcion;
     private String telefono;
     private String email;
+    private String imagenUrl;
 
     @ManyToOne
     @JoinColumn(name = "departamento_id")
@@ -80,6 +81,14 @@ public class Hotel {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 
     public Departamento getDepartamento() {

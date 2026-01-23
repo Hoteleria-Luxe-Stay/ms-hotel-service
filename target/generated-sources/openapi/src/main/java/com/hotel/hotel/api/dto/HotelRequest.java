@@ -18,7 +18,7 @@ import jakarta.annotation.Generated;
  * HotelRequest
  */
 
-@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-01-23T03:40:40.575624500-05:00[America/Lima]", comments = "Generator version: 7.6.0")
+@Generated(value = "org.openapitools.codegen.languages.SpringCodegen", date = "2026-01-23T10:30:14.501746300-05:00[America/Lima]", comments = "Generator version: 7.6.0")
 public class HotelRequest {
 
   private String nombre;
@@ -30,6 +30,8 @@ public class HotelRequest {
   private String telefono;
 
   private String email;
+
+  private String imagenUrl;
 
   private Long departamentoId;
 
@@ -146,6 +148,26 @@ public class HotelRequest {
     this.email = email;
   }
 
+  public HotelRequest imagenUrl(String imagenUrl) {
+    this.imagenUrl = imagenUrl;
+    return this;
+  }
+
+  /**
+   * URL de la imagen del hotel
+   * @return imagenUrl
+  */
+  
+  @Schema(name = "imagenUrl", description = "URL de la imagen del hotel", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+  @JsonProperty("imagenUrl")
+  public String getImagenUrl() {
+    return imagenUrl;
+  }
+
+  public void setImagenUrl(String imagenUrl) {
+    this.imagenUrl = imagenUrl;
+  }
+
   public HotelRequest departamentoId(Long departamentoId) {
     this.departamentoId = departamentoId;
     return this;
@@ -180,12 +202,13 @@ public class HotelRequest {
         Objects.equals(this.descripcion, hotelRequest.descripcion) &&
         Objects.equals(this.telefono, hotelRequest.telefono) &&
         Objects.equals(this.email, hotelRequest.email) &&
+        Objects.equals(this.imagenUrl, hotelRequest.imagenUrl) &&
         Objects.equals(this.departamentoId, hotelRequest.departamentoId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(nombre, direccion, descripcion, telefono, email, departamentoId);
+    return Objects.hash(nombre, direccion, descripcion, telefono, email, imagenUrl, departamentoId);
   }
 
   @Override
@@ -197,6 +220,7 @@ public class HotelRequest {
     sb.append("    descripcion: ").append(toIndentedString(descripcion)).append("\n");
     sb.append("    telefono: ").append(toIndentedString(telefono)).append("\n");
     sb.append("    email: ").append(toIndentedString(email)).append("\n");
+    sb.append("    imagenUrl: ").append(toIndentedString(imagenUrl)).append("\n");
     sb.append("    departamentoId: ").append(toIndentedString(departamentoId)).append("\n");
     sb.append("}");
     return sb.toString();

@@ -22,6 +22,7 @@ public class HotelMapper {
         response.setDescripcion(hotel.getDescripcion());
         response.setTelefono(hotel.getTelefono());
         response.setEmail(hotel.getEmail());
+        response.setImagenUrl(hotel.getImagenUrl());
         response.setDepartamento(DepartamentoMapper.toResponse(hotel.getDepartamento()));
         return response;
     }
@@ -34,6 +35,7 @@ public class HotelMapper {
         response.setDescripcion(hotel.getDescripcion());
         response.setTelefono(hotel.getTelefono());
         response.setEmail(hotel.getEmail());
+        response.setImagenUrl(hotel.getImagenUrl());
         response.setDepartamento(DepartamentoMapper.toResponse(hotel.getDepartamento()));
         response.setHabitaciones(HabitacionMapper.toResponseList(hotel.getHabitaciones()));
         response.setPrecioMinimo(hotel.getPrecioMinimo());

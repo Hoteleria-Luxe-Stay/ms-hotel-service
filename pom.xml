@@ -54,6 +54,11 @@
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.6</version>
+        </dependency>
 
         <!-- Database -->
         <dependency>
@@ -117,7 +122,7 @@
                             <generateModelDocs>false</generateModelDocs>
                             <generateApiTests>false</generateApiTests>
                             <generateApiDocs>false</generateApiDocs>
-                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateSupportingFiles>true</generateSupportingFiles>
                         </configuration>
                     </execution>
                 </executions>

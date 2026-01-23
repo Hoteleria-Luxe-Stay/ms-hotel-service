@@ -54,6 +54,7 @@ public class HotelService {
         hotel.setDescripcion(hotelRequest.getDescripcion());
         hotel.setTelefono(hotelRequest.getTelefono());
         hotel.setEmail(hotelRequest.getEmail());
+        hotel.setImagenUrl(hotelRequest.getImagenUrl());
         hotel.setDepartamento(departamento);
 
         return hotelRepository.save(hotel);
@@ -71,6 +72,7 @@ public class HotelService {
         hotel.setDescripcion(hotelRequest.getDescripcion());
         hotel.setTelefono(hotelRequest.getTelefono());
         hotel.setEmail(hotelRequest.getEmail());
+        hotel.setImagenUrl(hotelRequest.getImagenUrl());
         hotel.setDepartamento(departamento);
 
         return hotelRepository.save(hotel);
