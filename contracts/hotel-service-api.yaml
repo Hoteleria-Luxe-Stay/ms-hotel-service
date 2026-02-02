@@ -262,6 +262,44 @@ paths:
               schema:
                 $ref: '#/components/schemas/HabitacionResponse'
 
+    put:
+      tags: [habitaciones]
+      summary: Actualizar habitacion (admin)
+      operationId: actualizarHabitacion
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HabitacionRequest'
+      responses:
+        '200':
+          description: Habitacion actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HabitacionResponse'
+
+    delete:
+      tags: [habitaciones]
+      summary: Eliminar habitacion (admin)
+      operationId: eliminarHabitacion
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Habitacion eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+
   /habitaciones/{id}/disponibilidad:
     get:
       tags: [habitaciones]

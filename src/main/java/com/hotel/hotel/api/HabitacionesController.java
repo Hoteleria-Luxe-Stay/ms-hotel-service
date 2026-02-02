@@ -4,15 +4,17 @@ import com.hotel.hotel.api.dto.DisponibilidadResponse;
 import com.hotel.hotel.api.dto.HabitacionRequest;
 import com.hotel.hotel.api.dto.HabitacionResponse;
 import com.hotel.hotel.api.dto.HabitacionesDisponiblesResponse;
+import com.hotel.hotel.api.dto.MessageResponse;
 import com.hotel.hotel.core.habitacion.model.Habitacion;
 import com.hotel.hotel.core.habitacion.service.HabitacionService;
 import com.hotel.hotel.helpers.mappers.HabitacionMapper;
-import com.hotel.hotel.internal.AuthInternalApi;
 import com.hotel.hotel.internal.dto.TokenValidationResponse;
+import com.hotel.hotel.infrastructure.security.AuthContextFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
+import org.springframework.web.context.request.RequestAttributes;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,14 +24,11 @@ import java.util.Optional;
 public class HabitacionesController implements HabitacionesApi {
 
     private final HabitacionService habitacionService;
-    private final AuthInternalApi authInternalApi;
     private final NativeWebRequest request;
 
     public HabitacionesController(HabitacionService habitacionService,
-                                  AuthInternalApi authInternalApi,
                                   NativeWebRequest request) {
         this.habitacionService = habitacionService;
-        this.authInternalApi = authInternalApi;
         this.request = request;
     }
 
@@ -52,7 +51,7 @@ public class HabitacionesController implements HabitacionesApi {
 
     @Override
     public ResponseEntity<HabitacionResponse> crearHabitacion(HabitacionRequest request) {
-        TokenValidationResponse auth = resolveAuth();
+        TokenValidationResponse auth = getAuth();
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
@@ -68,6 +67,37 @@ public class HabitacionesController implements HabitacionesApi {
     public ResponseEntity<HabitacionResponse> obtenerHabitacion(Long id) {
         Habitacion habitacion = habitacionService.buscarPorId(id);
         return ResponseEntity.ok(HabitacionMapper.toResponse(habitacion));
+    }
+
+    @Override
+    public ResponseEntity<HabitacionResponse> actualizarHabitacion(Long id, HabitacionRequest request) {
+        TokenValidationResponse auth = getAuth();
+        if (auth == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!isAdmin(auth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Habitacion habitacion = habitacionService.actualizar(id, request);
+        return ResponseEntity.ok(HabitacionMapper.toResponse(habitacion));
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> eliminarHabitacion(Long id) {
+        TokenValidationResponse auth = getAuth();
+        if (auth == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!isAdmin(auth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        habitacionService.eliminar(id);
+        MessageResponse response = new MessageResponse();
+        response.setMessage("Habitacion eliminada");
+        response.setTimestamp(java.time.OffsetDateTime.now());
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -97,25 +127,16 @@ public class HabitacionesController implements HabitacionesApi {
         return Optional.ofNullable(request);
     }
 
-    private TokenValidationResponse resolveAuth() {
-        String authorization = resolveAuthorization();
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            return null;
-        }
-        String token = authorization.substring(7);
-        TokenValidationResponse response = authInternalApi.validateToken(token).orElse(null);
-        if (response == null || !Boolean.TRUE.equals(response.getValid())) {
-            return null;
-        }
-        return response;
-    }
-
-    private String resolveAuthorization() {
+    private TokenValidationResponse getAuth() {
         Optional<NativeWebRequest> request = getRequest();
         if (request.isEmpty()) {
             return null;
         }
-        return request.get().getHeader("Authorization");
+        Object value = request.get().getAttribute(AuthContextFilter.AUTH_CONTEXT_KEY, RequestAttributes.SCOPE_REQUEST);
+        if (value instanceof TokenValidationResponse response) {
+            return response;
+        }
+        return null;
     }
 
     private boolean isAdmin(TokenValidationResponse auth) {

@@ -55,6 +55,26 @@ public class HabitacionService {
         return habitacionRepository.save(habitacion);
     }
 
+    public Habitacion actualizar(Long id, HabitacionRequest request) {
+        Habitacion habitacion = buscarPorId(id);
+        Hotel hotel = hotelRepository.findById(request.getHotelId())
+                .orElseThrow(() -> new EntityNotFoundException("Hotel", request.getHotelId()));
+        TipoHabitacion tipoHabitacion = tipoHabitacionService.buscarPorId(request.getTipoHabitacionId());
+
+        habitacion.setNumero(request.getNumero());
+        habitacion.setPrecio(request.getPrecio());
+        habitacion.setCapacidad(request.getCapacidad());
+        habitacion.setHotel(hotel);
+        habitacion.setTipoHabitacion(tipoHabitacion);
+
+        return habitacionRepository.save(habitacion);
+    }
+
+    public void eliminar(Long id) {
+        Habitacion habitacion = buscarPorId(id);
+        habitacionRepository.delete(habitacion);
+    }
+
     public List<Habitacion> buscarDisponibles(Long hotelId, LocalDate inicio, LocalDate fin) {
         return habitacionRepository.findByHotelIdAndEstado(hotelId, ESTADO_DISPONIBLE);
     }
