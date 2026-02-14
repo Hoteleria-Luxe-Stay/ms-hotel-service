@@ -207,18 +207,6 @@ paths:
           schema:
             type: integer
             format: int64
-        - name: fechaInicio
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: fechaFin
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
       responses:
         '200':
           description: Habitaciones disponibles
@@ -307,18 +295,6 @@ paths:
       operationId: verificarDisponibilidad
       parameters:
         - $ref: '#/components/parameters/IdPath'
-        - name: fechaInicio
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: fechaFin
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
       responses:
         '200':
           description: Estado de disponibilidad
@@ -465,6 +441,8 @@ components:
           format: int64
         numero:
           type: string
+        estado:
+          type: string
         precio:
           type: number
           format: double
@@ -482,12 +460,6 @@ components:
         hotelId:
           type: integer
           format: int64
-        fechaInicio:
-          type: string
-          format: date
-        fechaFin:
-          type: string
-          format: date
         habitaciones:
           type: array
           items:
@@ -501,12 +473,6 @@ components:
           format: int64
         disponible:
           type: boolean
-        fechaInicio:
-          type: string
-          format: date
-        fechaFin:
-          type: string
-          format: date
 
     TipoHabitacionResponse:
       type: object

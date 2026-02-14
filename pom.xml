@@ -56,12 +56,6 @@
             <artifactId>spring-cloud-starter-loadbalancer</artifactId>
         </dependency>
 
-        <!-- RabbitMQ -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-amqp</artifactId>
-        </dependency>
-
         <!-- OpenAPI / Swagger -->
         <dependency>
             <groupId>org.springdoc</groupId>

@@ -7,16 +7,14 @@ import com.hotel.hotel.api.dto.HabitacionesDisponiblesResponse;
 import com.hotel.hotel.api.dto.MessageResponse;
 import com.hotel.hotel.core.habitacion.model.Habitacion;
 import com.hotel.hotel.core.habitacion.service.HabitacionService;
+import com.hotel.hotel.helpers.auth.AuthUtils;
 import com.hotel.hotel.helpers.mappers.HabitacionMapper;
 import com.hotel.hotel.internal.dto.TokenValidationResponse;
-import com.hotel.hotel.infrastructure.security.AuthContextFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,17 +31,12 @@ public class HabitacionesController implements HabitacionesApi {
     }
 
     @Override
-    public ResponseEntity<HabitacionesDisponiblesResponse> listarHabitacionesDisponibles(
-            Long hotelId,
-            LocalDate fechaInicio,
-            LocalDate fechaFin) {
+    public ResponseEntity<HabitacionesDisponiblesResponse> listarHabitacionesDisponibles(Long hotelId) {
 
-        List<Habitacion> habitaciones = habitacionService.buscarDisponibles(hotelId, fechaInicio, fechaFin);
+        List<Habitacion> habitaciones = habitacionService.buscarDisponibles(hotelId);
 
         HabitacionesDisponiblesResponse response = new HabitacionesDisponiblesResponse();
         response.setHotelId(hotelId);
-        response.setFechaInicio(fechaInicio);
-        response.setFechaFin(fechaFin);
         response.setHabitaciones(HabitacionMapper.toResponseList(habitaciones));
 
         return ResponseEntity.ok(response);
@@ -51,11 +44,11 @@ public class HabitacionesController implements HabitacionesApi {
 
     @Override
     public ResponseEntity<HabitacionResponse> crearHabitacion(HabitacionRequest request) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -71,11 +64,11 @@ public class HabitacionesController implements HabitacionesApi {
 
     @Override
     public ResponseEntity<HabitacionResponse> actualizarHabitacion(Long id, HabitacionRequest request) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -85,11 +78,11 @@ public class HabitacionesController implements HabitacionesApi {
 
     @Override
     public ResponseEntity<MessageResponse> eliminarHabitacion(Long id) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -107,39 +100,18 @@ public class HabitacionesController implements HabitacionesApi {
     }
 
     @Override
-    public ResponseEntity<DisponibilidadResponse> verificarDisponibilidad(
-            Long id,
-            LocalDate fechaInicio,
-            LocalDate fechaFin) {
+    public ResponseEntity<DisponibilidadResponse> verificarDisponibilidad(Long id) {
 
-        boolean disponible = habitacionService.estaDisponible(id, fechaInicio, fechaFin);
+        boolean disponible = habitacionService.estaDisponible(id);
 
         DisponibilidadResponse response = new DisponibilidadResponse();
         response.setHabitacionId(id);
         response.setDisponible(disponible);
-        response.setFechaInicio(fechaInicio);
-        response.setFechaFin(fechaFin);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
-    }
-
-    private TokenValidationResponse getAuth() {
-        Optional<NativeWebRequest> request = getRequest();
-        if (request.isEmpty()) {
-            return null;
-        }
-        Object value = request.get().getAttribute(AuthContextFilter.AUTH_CONTEXT_KEY, RequestAttributes.SCOPE_REQUEST);
-        if (value instanceof TokenValidationResponse response) {
-            return response;
-        }
-        return null;
-    }
-
-    private boolean isAdmin(TokenValidationResponse auth) {
-        return auth.getRole() != null && "ADMIN".equalsIgnoreCase(auth.getRole());
     }
 }

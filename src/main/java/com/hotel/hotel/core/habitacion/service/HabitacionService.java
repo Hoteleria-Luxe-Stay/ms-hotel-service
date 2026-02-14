@@ -10,7 +10,6 @@ import com.hotel.hotel.core.tipoHabitacion.service.TipoHabitacionService;
 import com.hotel.hotel.helpers.exceptions.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -75,16 +74,16 @@ public class HabitacionService {
         habitacionRepository.delete(habitacion);
     }
 
-    public List<Habitacion> buscarDisponibles(Long hotelId, LocalDate inicio, LocalDate fin) {
+    public List<Habitacion> buscarDisponibles(Long hotelId) {
         return habitacionRepository.findByHotelIdAndEstado(hotelId, ESTADO_DISPONIBLE);
     }
 
-    public boolean estaDisponible(Long habitacionId, LocalDate inicio, LocalDate fin) {
+    public boolean estaDisponible(Long habitacionId) {
         Habitacion habitacion = buscarPorId(habitacionId);
         return ESTADO_DISPONIBLE.equals(habitacion.getEstado());
     }
 
-    public int obtenerCantidadDisponible(Long hotelId, LocalDate inicio, LocalDate fin) {
+    public int obtenerCantidadDisponible(Long hotelId) {
         return Math.toIntExact(habitacionRepository.countByHotelIdAndEstado(hotelId, ESTADO_DISPONIBLE));
     }
 }

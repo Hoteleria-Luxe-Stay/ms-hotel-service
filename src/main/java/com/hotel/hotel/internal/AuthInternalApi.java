@@ -1,7 +1,8 @@
 package com.hotel.hotel.internal;
 
-import com.hotel.hotel.internal.dto.UserInternalResponse;
+import com.hotel.hotel.internal.dto.TokenValidationRequest;
 import com.hotel.hotel.internal.dto.TokenValidationResponse;
+import com.hotel.hotel.internal.dto.UserInternalResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,8 +40,8 @@ public class AuthInternalApi {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
 
-            String body = String.format("{\"token\": \"%s\"}", token);
-            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            TokenValidationRequest body = new TokenValidationRequest(token);
+            HttpEntity<TokenValidationRequest> request = new HttpEntity<>(body, headers);
 
             ResponseEntity<TokenValidationResponse> response = restTemplate.exchange(
                     url,

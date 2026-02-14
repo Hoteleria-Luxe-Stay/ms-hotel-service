@@ -6,14 +6,13 @@ import com.hotel.hotel.api.dto.HotelResponse;
 import com.hotel.hotel.api.dto.MessageResponse;
 import com.hotel.hotel.core.hotel.model.Hotel;
 import com.hotel.hotel.core.hotel.service.HotelService;
+import com.hotel.hotel.helpers.auth.AuthUtils;
 import com.hotel.hotel.helpers.mappers.HotelMapper;
 import com.hotel.hotel.internal.dto.TokenValidationResponse;
-import com.hotel.hotel.infrastructure.security.AuthContextFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -45,11 +44,11 @@ public class HotelesController implements HotelesApi {
 
     @Override
     public ResponseEntity<HotelResponse> crearHotel(HotelRequest request) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -65,11 +64,11 @@ public class HotelesController implements HotelesApi {
 
     @Override
     public ResponseEntity<HotelResponse> actualizarHotel(Long id, HotelRequest request) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -79,11 +78,11 @@ public class HotelesController implements HotelesApi {
 
     @Override
     public ResponseEntity<MessageResponse> eliminarHotel(Long id) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -99,21 +98,5 @@ public class HotelesController implements HotelesApi {
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
-    }
-
-    private TokenValidationResponse getAuth() {
-        Optional<NativeWebRequest> request = getRequest();
-        if (request.isEmpty()) {
-            return null;
-        }
-        Object value = request.get().getAttribute(AuthContextFilter.AUTH_CONTEXT_KEY, RequestAttributes.SCOPE_REQUEST);
-        if (value instanceof TokenValidationResponse response) {
-            return response;
-        }
-        return null;
-    }
-
-    private boolean isAdmin(TokenValidationResponse auth) {
-        return auth.getRole() != null && "ADMIN".equalsIgnoreCase(auth.getRole());
     }
 }

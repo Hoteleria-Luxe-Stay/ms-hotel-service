@@ -19,6 +19,7 @@ public class HabitacionMapper {
         HabitacionResponse response = new HabitacionResponse();
         response.setId(habitacion.getId());
         response.setNumero(habitacion.getNumero());
+        response.setEstado(habitacion.getEstado());
         response.setPrecio(habitacion.getPrecio());
         response.setCapacidad(habitacion.getCapacidad());
         response.setTipoHabitacion(TipoHabitacionMapper.toResponse(habitacion.getTipoHabitacion()));

@@ -4,14 +4,13 @@ import com.hotel.hotel.api.dto.DepartamentoRequest;
 import com.hotel.hotel.api.dto.DepartamentoResponse;
 import com.hotel.hotel.core.departamento.model.Departamento;
 import com.hotel.hotel.core.departamento.service.DepartamentoService;
+import com.hotel.hotel.helpers.auth.AuthUtils;
 import com.hotel.hotel.helpers.mappers.DepartamentoMapper;
 import com.hotel.hotel.internal.dto.TokenValidationResponse;
-import com.hotel.hotel.infrastructure.security.AuthContextFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.NativeWebRequest;
-import org.springframework.web.context.request.RequestAttributes;
 
 import java.util.List;
 import java.util.Optional;
@@ -36,11 +35,11 @@ public class DepartamentosController implements DepartamentosApi {
 
     @Override
     public ResponseEntity<DepartamentoResponse> crearDepartamento(DepartamentoRequest request) {
-        TokenValidationResponse auth = getAuth();
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
         if (auth == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        if (!isAdmin(auth)) {
+        if (!AuthUtils.isAdmin(auth)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -58,21 +57,5 @@ public class DepartamentosController implements DepartamentosApi {
     @Override
     public Optional<NativeWebRequest> getRequest() {
         return Optional.ofNullable(request);
-    }
-
-    private TokenValidationResponse getAuth() {
-        Optional<NativeWebRequest> request = getRequest();
-        if (request.isEmpty()) {
-            return null;
-        }
-        Object value = request.get().getAttribute(AuthContextFilter.AUTH_CONTEXT_KEY, RequestAttributes.SCOPE_REQUEST);
-        if (value instanceof TokenValidationResponse response) {
-            return response;
-        }
-        return null;
-    }
-
-    private boolean isAdmin(TokenValidationResponse auth) {
-        return auth.getRole() != null && "ADMIN".equalsIgnoreCase(auth.getRole());
     }
 }
