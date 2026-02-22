@@ -2,6 +2,7 @@ package com.hotel.hotel.api;
 
 import com.hotel.hotel.api.dto.DepartamentoRequest;
 import com.hotel.hotel.api.dto.DepartamentoResponse;
+import com.hotel.hotel.api.dto.MessageResponse;
 import com.hotel.hotel.core.departamento.model.Departamento;
 import com.hotel.hotel.core.departamento.service.DepartamentoService;
 import com.hotel.hotel.helpers.auth.AuthUtils;
@@ -52,6 +53,37 @@ public class DepartamentosController implements DepartamentosApi {
     public ResponseEntity<DepartamentoResponse> obtenerDepartamento(Long id) {
         Departamento departamento = departamentoService.buscarPorId(id);
         return ResponseEntity.ok(DepartamentoMapper.toResponse(departamento));
+    }
+
+    @Override
+    public ResponseEntity<DepartamentoResponse> actualizarDepartamento(Long id, DepartamentoRequest request) {
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
+        if (auth == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!AuthUtils.isAdmin(auth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        Departamento departamento = departamentoService.actualizar(id, request);
+        return ResponseEntity.ok(DepartamentoMapper.toResponse(departamento));
+    }
+
+    @Override
+    public ResponseEntity<MessageResponse> eliminarDepartamento(Long id) {
+        TokenValidationResponse auth = AuthUtils.getAuth(this.request);
+        if (auth == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        if (!AuthUtils.isAdmin(auth)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        departamentoService.eliminar(id);
+
+        MessageResponse response = new MessageResponse();
+        response.setMessage("Departamento eliminado correctamente");
+        return ResponseEntity.ok(response);
     }
 
     @Override

@@ -79,6 +79,56 @@ paths:
         '404':
           description: No encontrado
 
+    put:
+      tags: [departamentos]
+      summary: Actualizar departamento (admin)
+      operationId: actualizarDepartamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DepartamentoRequest'
+      responses:
+        '200':
+          description: Departamento actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DepartamentoResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: No autorizado
+        '404':
+          description: No encontrado
+
+    delete:
+      tags: [departamentos]
+      summary: Eliminar departamento (admin)
+      operationId: eliminarDepartamento
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/IdPath'
+      responses:
+        '200':
+          description: Departamento eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageResponse'
+        '401':
+          description: No autenticado
+        '403':
+          description: No autorizado
+        '404':
+          description: No encontrado
+
   # ==================== HOTELES ====================
   /hoteles:
     get:
