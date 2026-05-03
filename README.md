@@ -1,6 +1,6 @@
-# Hotel Service - Sistema de Reservas de Hoteles
+# Hotel Service - Sistema de Reserva de Hoteles
 
-Microservicio de gestión de hoteles, habitaciones, departamentos y tipos de habitación. Proporciona información sobre disponibilidad y precios.
+Microservicio de gestión de hoteles, departamentos, habitaciones y tipos de habitación. Lectura del catálogo es pública; escritura restringida al rol `ADMIN`. Se autentica contra `auth-service` para obtener tokens técnicos (OAuth2 `client_credentials`).
 
 ## Información del Servicio
 
@@ -10,15 +10,17 @@ Microservicio de gestión de hoteles, habitaciones, departamentos y tipos de hab
 | Java | 21 |
 | Spring Boot | 3.4.0 |
 | Spring Cloud | 2024.0.1 |
-| Context Path | /api/v1 |
+| Context Path | `/api/v1` |
 | Base de Datos | MySQL |
+| Validación JWT | **RS256** con clave pública RSA compartida |
 
-## Estructura del Proyecto
+## Estructura del Proyecto (Package-by-Feature)
 
 ```
-ms-hotel/
+ms-hotel-service/
 ├── pom.xml
 ├── Dockerfile
+├── env.example                ← copialo a .env y completalo en DEV
 ├── contracts/
 │   └── hotel-service-api.yaml
 └── src/main/
@@ -34,441 +36,99 @@ ms-hotel/
     │   │   ├── hotel/ (model, repository, service)
     │   │   ├── habitacion/ (model, repository, service)
     │   │   └── tipoHabitacion/ (model, repository, service)
-    │   ├── helpers/ (exceptions, mappers)
-    │   ├── infrastructure/ (config, security)
-    │   └── internal/ (AuthInternalApi, DTOs)
+    │   ├── helpers/
+    │   │   ├── auth/AuthUtils.java
+    │   │   ├── errors/ApiErrorResponse.java
+    │   │   ├── exceptions/ (EntityNotFoundException, ValidationException)
+    │   │   └── mappers/ (DepartamentoMapper, HotelMapper, HabitacionMapper, TipoHabitacionMapper)
+    │   ├── infrastructure/
+    │   │   ├── config/ (SecurityConfig, JwtConfig, RestTemplateConfig, GlobalExceptionHandler)
+    │   │   └── security/AuthContextFilter.java
+    │   └── internal/
+    │       ├── AuthInternalApi.java       ← cliente REST hacia auth-service
+    │       ├── ServiceTokenProvider.java  ← cachea token OAuth2 c.c.
+    │       └── dto/ (TokenValidationResponse, UserInternalResponse)
     └── resources/
-        └── application.yml
+        └── application.yml    ← bootstrap mínimo (config-server lo hidrata)
 ```
 
 ## Endpoints
 
 ### Departamentos
 
-| Método | Endpoint | Descripción | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/departamentos` | Listar todos | No |
-| GET | `/api/v1/departamentos/{id}` | Obtener por ID | No |
-| POST | `/api/v1/departamentos` | Crear | ADMIN |
+| Método | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/departamentos` | Público |
+| GET | `/api/v1/departamentos/{id}` | Público |
+| POST | `/api/v1/departamentos` | ADMIN |
 
 ### Hoteles
 
-| Método | Endpoint | Descripción | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/hoteles` | Listar (filtro por departamentoId) | No |
-| GET | `/api/v1/hoteles/{id}` | Obtener detalle con habitaciones | No |
-| POST | `/api/v1/hoteles` | Crear hotel | ADMIN |
-| PUT | `/api/v1/hoteles/{id}` | Actualizar hotel | ADMIN |
-| DELETE | `/api/v1/hoteles/{id}` | Eliminar hotel | ADMIN |
+| Método | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/hoteles` (filtro por `departamentoId`) | Público |
+| GET | `/api/v1/hoteles/{id}` | Público |
+| POST | `/api/v1/hoteles` | ADMIN |
+| PUT | `/api/v1/hoteles/{id}` | ADMIN |
+| DELETE | `/api/v1/hoteles/{id}` | ADMIN |
 
 ### Habitaciones
 
-| Método | Endpoint | Descripción | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/habitaciones` | Listar disponibles (hotelId, fechas) | No |
-| GET | `/api/v1/habitaciones/{id}` | Obtener por ID | No |
-| GET | `/api/v1/habitaciones/{id}/disponibilidad` | Verificar disponibilidad | No |
-| GET | `/api/v1/hoteles/{id}/habitaciones` | Habitaciones de un hotel | No |
-| POST | `/api/v1/habitaciones` | Crear habitación | ADMIN |
-| PUT | `/api/v1/habitaciones/{id}` | Actualizar | ADMIN |
-| DELETE | `/api/v1/habitaciones/{id}` | Eliminar | ADMIN |
+| Método | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/habitaciones` (filtros `hotelId`, fechas) | Público |
+| GET | `/api/v1/habitaciones/{id}` | Público |
+| GET | `/api/v1/habitaciones/{id}/disponibilidad` | Público |
+| GET | `/api/v1/hoteles/{id}/habitaciones` | Público |
+| POST | `/api/v1/habitaciones` | ADMIN |
+| PUT | `/api/v1/habitaciones/{id}` | ADMIN |
+| DELETE | `/api/v1/habitaciones/{id}` | ADMIN |
 
 ### Tipos de Habitación
 
-| Método | Endpoint | Descripción | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/tipos-habitacion` | Listar todos | No |
+| Método | Endpoint | Auth |
+|--------|----------|------|
+| GET | `/api/v1/tipos-habitacion` | Público |
 
 ## Variables de Entorno
 
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
-| `SERVER_PORT` | Puerto del servicio | `8082` |
-| `SPRING_DATASOURCE_URL` | URL MySQL | `jdbc:mysql://mysql:3306/hotel_db` |
-| `SPRING_DATASOURCE_USERNAME` | Usuario BD | `hotel_user` |
-| `SPRING_DATASOURCE_PASSWORD` | Contraseña BD | `hotel_pass` |
-| `SPRING_RABBITMQ_HOST` | Host RabbitMQ | `rabbitmq` |
-| `SPRING_RABBITMQ_PORT` | Puerto RabbitMQ | `5672` |
-| `EUREKA_URL` | URL Eureka | `http://discovery-service:8761/eureka` |
-| `CONFIG_SERVER_URL` | URL Config Server | `http://config-server:8888` |
-| `AUTH_SERVICE_URL` | URL Auth Service | `http://auth-service:8081` |
+| Variable | Obligatoria | Descripción | Ejemplo (DEV) |
+|----------|-------------|-------------|---------------|
+| `CONFIG_IMPORT` | No | Import de Spring Cloud Config | `optional:configserver:http://localhost:8888` |
+| `CONFIG_FAIL_FAST` | No | Falla rápido si config-server no responde | `false` (DEV) / `true` (PROD) |
+| `SERVER_PORT` | No | Puerto HTTP (default 8082) | `8082` |
+| `EUREKA_URL` | No | URL de Eureka (default `http://discovery-service:8761/eureka`) | `http://localhost:8761/eureka` |
+| `SPRING_DATASOURCE_URL` | **Sí** | JDBC URL de MySQL | `jdbc:mysql://localhost:3307/hotel_db` |
+| `SPRING_DATASOURCE_USERNAME` | **Sí** | Usuario MySQL | - |
+| `SPRING_DATASOURCE_PASSWORD` | **Sí** | Contraseña MySQL | - |
+| `SPRING_JPA_HIBERNATE_DDL_AUTO` | No | Default `validate` (PROD-safe) | `update` (DEV) |
+| `SPRING_JPA_SHOW_SQL` | No | Default `false` (PROD-safe) | `true` (DEV) |
+| `JWT_PUBLIC_KEY` | **Sí** | Clave pública RSA del auth-service en PEM (1 línea con `\n`) | - |
+| `AUTH_SERVICE_URL` | **Sí** | URL base del auth-service (sin context-path) | `http://localhost:8081` |
+| `AUTH_SERVICE_CLIENT_ID` | **Sí** | Client ID asignado a hotel-service en auth-service | - |
+| `AUTH_SERVICE_CLIENT_SECRET` | **Sí** | Client secret correspondiente | - |
+| `CORS_ALLOWED_ORIGINS` | **Sí** | Origen permitido para CORS | `http://localhost:4200` |
 
----
+> Las credenciales `AUTH_SERVICE_CLIENT_ID/SECRET` deben coincidir con las que se siembran en `auth-service` mediante `HOTEL_SERVICE_CLIENT_ID/SECRET`.
 
-## Docker
+## Datos Iniciales (al primer arranque)
 
-### Dockerfile
+`DataInit.java` siembra:
 
-```dockerfile
-FROM maven:3.9-eclipse-temurin-21-alpine AS builder
-WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
-COPY src ./src
-COPY contracts ./contracts
-RUN mvn clean package -DskipTests -B
+- **Tipos de Habitación**: Simple (1), Doble (2), Suite (4), Familiar (5).
+- **Departamentos**: Lima, Cusco, Arequipa.
+- **Hoteles + habitaciones**:
+  - Hotel Lima Centro: 5 habitaciones, USD 80–250
+  - Hotel Cusco Imperial: 4 habitaciones, USD 90–300
+  - Hotel Arequipa Plaza: 4 habitaciones, USD 70–220
 
-FROM eclipse-temurin:21-jre-alpine
-WORKDIR /app
-RUN addgroup -S spring && adduser -S spring -G spring
-COPY --from=builder /app/target/*.jar app.jar
-USER spring:spring
-EXPOSE 8082
-ENV JAVA_OPTS="-Xms256m -Xmx512m"
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:8082/api/v1/actuator/health || exit 1
-ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar app.jar"]
-```
+## Seguridad
 
-### docker-compose.yml
-
-```yaml
-version: '3.8'
-
-services:
-  hotel-service:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: hotel-service
-    ports:
-      - "8082:8082"
-    environment:
-      - SERVER_PORT=8082
-      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hotel_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      - SPRING_DATASOURCE_USERNAME=hotel_user
-      - SPRING_DATASOURCE_PASSWORD=hotel_pass
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_RABBITMQ_PORT=5672
-      - EUREKA_URL=http://discovery-service:8761/eureka
-      - CONFIG_SERVER_URL=http://config-server:8888
-      - AUTH_SERVICE_URL=http://auth-service:8081
-      - JAVA_OPTS=-Xms256m -Xmx512m
-    depends_on:
-      mysql:
-        condition: service_healthy
-      auth-service:
-        condition: service_healthy
-    networks:
-      - hotel-network
-    healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8082/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 90s
-    restart: unless-stopped
-
-networks:
-  hotel-network:
-    external: true
-```
-
-### Comandos Docker
-
-```bash
-# Compilar
-mvn clean package -DskipTests
-
-# Construir imagen
-docker build -t hotel-service:latest .
-
-# Ejecutar
-docker run -d \
-  --name hotel-service \
-  -p 8082:8082 \
-  -e SERVER_PORT=8082 \
-  -e SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/hotel_db \
-  -e SPRING_DATASOURCE_USERNAME=hotel_user \
-  -e SPRING_DATASOURCE_PASSWORD=hotel_pass \
-  -e AUTH_SERVICE_URL=http://auth-service:8081 \
-  -e EUREKA_URL=http://discovery-service:8761/eureka \
-  --network hotel-network \
-  hotel-service:latest
-
-# Verificar
-curl http://localhost:8082/actuator/health
-
-# Listar hoteles
-curl http://localhost:8082/api/v1/hoteles
-```
-
----
-
-## Kubernetes
-
-### Deployment
-
-```yaml
-# k8s/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hotel-service
-  namespace: hotel-system
-  labels:
-    app: hotel-service
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: hotel-service
-  template:
-    metadata:
-      labels:
-        app: hotel-service
-    spec:
-      containers:
-        - name: hotel-service
-          image: ${ACR_NAME}.azurecr.io/hotel-service:latest
-          ports:
-            - containerPort: 8082
-          env:
-            - name: SERVER_PORT
-              value: "8082"
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql:3306/hotel_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: hotel-secrets
-                  key: mysql-user
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: hotel-secrets
-                  key: mysql-password
-            - name: SPRING_RABBITMQ_HOST
-              value: "rabbitmq"
-            - name: EUREKA_URL
-              value: "http://discovery-service:8761/eureka"
-            - name: CONFIG_SERVER_URL
-              value: "http://config-server:8888"
-            - name: AUTH_SERVICE_URL
-              value: "http://auth-service:8081"
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
-          livenessProbe:
-            httpGet:
-              path: /actuator/health/liveness
-              port: 8082
-            initialDelaySeconds: 90
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /actuator/health/readiness
-              port: 8082
-            initialDelaySeconds: 60
-            periodSeconds: 5
-```
-
-### Service
-
-```yaml
-# k8s/service.yaml
-apiVersion: v1
-kind: Service
-metadata:
-  name: hotel-service
-  namespace: hotel-system
-spec:
-  type: ClusterIP
-  selector:
-    app: hotel-service
-  ports:
-    - port: 8082
-      targetPort: 8082
-      name: http
-```
-
-### Comandos Kubernetes
-
-```bash
-# Aplicar manifiestos
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
-
-# Verificar
-kubectl get pods -n hotel-system -l app=hotel-service
-kubectl logs -f deployment/hotel-service -n hotel-system
-
-# Port-forward
-kubectl port-forward svc/hotel-service 8082:8082 -n hotel-system
-
-# Test
-curl http://localhost:8082/api/v1/hoteles
-curl http://localhost:8082/api/v1/departamentos
-```
-
----
-
-## Azure
-
-### 1. Construir y Subir a ACR
-
-```bash
-export ACR_NAME="acrhotelreservas"
-
-az acr login --name $ACR_NAME
-
-az acr build \
-  --registry $ACR_NAME \
-  --image hotel-service:v1.0.0 \
-  --image hotel-service:latest \
-  .
-```
-
-### 2. Deployment en AKS
-
-```yaml
-# k8s/azure-deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hotel-service
-  namespace: hotel-system
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: hotel-service
-  template:
-    metadata:
-      labels:
-        app: hotel-service
-    spec:
-      containers:
-        - name: hotel-service
-          image: acrhotelreservas.azurecr.io/hotel-service:v1.0.0
-          ports:
-            - containerPort: 8082
-          env:
-            - name: SERVER_PORT
-              value: "8082"
-            - name: SPRING_DATASOURCE_URL
-              value: "jdbc:mysql://mysql-hotel-reservas.mysql.database.azure.com:3306/hotel_db?useSSL=true"
-            - name: SPRING_DATASOURCE_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: hotel-secrets
-                  key: mysql-user
-            - name: SPRING_DATASOURCE_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: hotel-secrets
-                  key: mysql-password
-            - name: EUREKA_URL
-              value: "http://discovery-service:8761/eureka"
-            - name: AUTH_SERVICE_URL
-              value: "http://auth-service:8081"
-          resources:
-            requests:
-              memory: "512Mi"
-              cpu: "250m"
-            limits:
-              memory: "1Gi"
-              cpu: "500m"
-```
-
-### 3. Azure DevOps Pipeline
-
-```yaml
-# azure-pipelines.yml
-trigger:
-  branches:
-    include:
-      - main
-  paths:
-    include:
-      - ms-hotel/**
-
-variables:
-  dockerRegistryServiceConnection: 'acr-connection'
-  imageRepository: 'hotel-service'
-  containerRegistry: 'acrhotelreservas.azurecr.io'
-  dockerfilePath: 'ms-hotel/Dockerfile'
-  tag: '$(Build.BuildId)'
-
-pool:
-  vmImage: 'ubuntu-latest'
-
-stages:
-  - stage: Build
-    jobs:
-      - job: Build
-        steps:
-          - task: Maven@3
-            displayName: 'Maven Package'
-            inputs:
-              mavenPomFile: 'ms-hotel/pom.xml'
-              goals: 'clean package'
-              options: '-DskipTests'
-              javaHomeOption: 'JDKVersion'
-              jdkVersionOption: '1.21'
-
-          - task: Docker@2
-            displayName: 'Build and Push'
-            inputs:
-              command: buildAndPush
-              repository: $(imageRepository)
-              dockerfile: $(dockerfilePath)
-              containerRegistry: $(dockerRegistryServiceConnection)
-              tags: |
-                $(tag)
-                latest
-
-  - stage: Deploy
-    dependsOn: Build
-    jobs:
-      - deployment: Deploy
-        environment: 'production'
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: KubernetesManifest@0
-                  inputs:
-                    action: deploy
-                    kubernetesServiceConnection: 'aks-connection'
-                    namespace: hotel-system
-                    manifests: |
-                      ms-hotel/k8s/*.yaml
-                    containers: |
-                      $(containerRegistry)/$(imageRepository):$(tag)
-```
-
----
-
-## Datos Iniciales
-
-Al iniciar, `DataInit` crea datos de prueba:
-
-### Tipos de Habitación
-| Nombre | Capacidad |
-|--------|-----------|
-| Simple | 1 |
-| Doble | 2 |
-| Suite | 4 |
-| Familiar | 5 |
-
-### Departamentos
-| Nombre | Descripción |
-|--------|-------------|
-| Lima | Costa central del Perú |
-| Cusco | Capital histórica |
-| Arequipa | Ciudad Blanca |
-
-### Hoteles y Habitaciones
-- **Hotel Lima Centro** (5 habitaciones, $80-$250)
-- **Hotel Cusco Imperial** (4 habitaciones, $90-$300)
-- **Hotel Arequipa Plaza** (4 habitaciones, $70-$220)
-
----
+- **Validación JWT**: RS256 con `JWT_PUBLIC_KEY` (la pareja pública de la clave privada del auth-service).
+- **Sesiones**: STATELESS.
+- **CORS**: deshabilitado en el servicio (lo maneja el `api-gateway`).
+- **Lectura pública**, **escritura restringida** vía claim de rol en el JWT.
+- **Service-to-service**: `ServiceTokenProvider` obtiene un token técnico del auth-service vía `client_credentials` y lo cachea hasta 30 segundos antes de la expiración.
 
 ## Modelo de Datos
 
@@ -486,51 +146,63 @@ Al iniciar, `DataInit` crea datos de prueba:
 ┌─────────────────┐       ┌─────────────────┐
 │     Hotel       │ 1:N   │   Habitacion    │
 ├─────────────────┼──────►├─────────────────┤
-│ id              │       │ id              │
-│ nombre          │       │ numero          │
-│ direccion       │       │ estado          │
-│ descripcion     │       │ precio          │
-│ telefono        │       │ capacidad       │
-│ email           │       │ tipoHabitacion  │
-│ imagenUrl       │       │ hotel           │
-│ departamento    │       └─────────────────┘
-└─────────────────┘
+│ id              │       │ id, numero      │
+│ nombre          │       │ estado, precio  │
+│ direccion       │       │ capacidad       │
+│ ...             │       │ tipoHabitacion  │
+└─────────────────┘       │ hotel           │
+                          └─────────────────┘
 ```
 
----
+## Schema Migrations (Flyway)
+
+El schema está versionado con **Flyway**. Cada cambio = nuevo script en `src/main/resources/db/migration/` con naming `V{n}__descripcion.sql`.
+
+- `V1__init_schema.sql` — estado inicial: `departamento`, `tipo_habitacion`, `hotel`, `habitacion` con FKs e índices.
+- Cambios futuros: `V2__...sql`, `V3__...sql`. **NUNCA se edita un script ya aplicado** — siempre se agrega uno nuevo.
+- Flyway corre **antes** que Hibernate: aplica los scripts pendientes y luego Hibernate valida (`ddl-auto: validate`) que las entidades calzan con el schema.
+- Tabla de control: `flyway_schema_history` (la crea Flyway al arrancar).
+
+### Variables relevantes
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `SPRING_FLYWAY_ENABLED` | `true` | Activa/desactiva Flyway |
+| `SPRING_FLYWAY_BASELINE_ON_MIGRATE` | `false` | `true` solo si la DB ya tenía tablas pre-Flyway |
+| `SPRING_FLYWAY_VALIDATE_ON_MIGRATE` | `true` | Valida checksums de scripts ya aplicados |
+
+### Workflow primera vez
+
+1. Crear el schema vacío en MySQL: `CREATE DATABASE hotel_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`
+2. Levantar el servicio → Flyway aplica `V1` automáticamente.
+3. Verificar con `SELECT version, description, success FROM flyway_schema_history;`.
+
+## Ejecución Local (DEV)
+
+```bash
+# 1. Infra (MySQL + RabbitMQ + Kafka)
+docker-compose -f docker-compose.infra.yml up -d
+
+# 2. Variables
+cp env.example .env
+# editar .env (especialmente JWT_PUBLIC_KEY, AUTH_SERVICE_CLIENT_ID/SECRET y credenciales BD)
+
+# 3. Levantar (auth-service debe estar arriba para los tokens técnicos)
+mvn spring-boot:run
+
+# Swagger UI
+open http://localhost:8082/api/v1/swagger-ui.html
+```
+
+## Ejecución en Docker (PROD)
+
+Multi-stage build, JRE 21 alpine, usuario no-root, healthcheck en `/api/v1/actuator/health`. Se levanta como parte de `docker-compose.prod.yml` (a definir) consumiendo `.env.prod` con TODAS las variables marcadas como obligatorias.
 
 ## Troubleshooting
 
-```bash
-# Ver logs
-kubectl logs -f deployment/hotel-service -n hotel-system
-
-# Verificar conexión con auth-service
-kubectl exec -it deployment/hotel-service -n hotel-system -- \
-  wget -qO- http://auth-service:8081/api/v1/actuator/health
-
-# Verificar BD
-kubectl exec -it deployment/hotel-service -n hotel-system -- \
-  wget -qO- http://localhost:8082/actuator/health
-
-# Debug endpoints
-curl http://localhost:8082/api/v1/hoteles
-curl http://localhost:8082/api/v1/habitaciones?hotelId=1
-```
-
----
-
-## Ejecución Local
-
-```bash
-# Compilar
-mvn clean package -DskipTests
-
-# Ejecutar
-java -jar target/hotel-service-1.0.0-SNAPSHOT.jar \
-  --server.port=8082 \
-  --spring.datasource.url=jdbc:mysql://localhost:3306/hotel_db
-
-# Swagger UI
-open http://localhost:8082/swagger-ui.html
-```
+| Síntoma | Causa probable | Solución |
+|---------|----------------|----------|
+| `No se pudo obtener token tecnico` | auth-service no responde o credenciales inválidas | Verificar `AUTH_SERVICE_URL` y que `AUTH_SERVICE_CLIENT_ID/SECRET` coincida con lo sembrado en auth |
+| 401 en endpoints protegidos | `JWT_PUBLIC_KEY` no es pareja de la privada de auth | Regenerar el keypair y propagarlo a auth + gateway + este servicio |
+| `Could not resolve placeholder ...` | Falta env var obligatoria | Revisar la tabla de variables |
+| Config-server timeouts al iniciar | `CONFIG_FAIL_FAST=true` con config-server caído | DEV: `CONFIG_FAIL_FAST=false`; PROD: levantar config-server primero |
