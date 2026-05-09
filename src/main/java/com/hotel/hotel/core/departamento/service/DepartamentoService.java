@@ -34,12 +34,14 @@ public class DepartamentoService {
     public Departamento crear(DepartamentoRequest request) {
         Departamento departamento = new Departamento();
         departamento.setNombre(request.getNombre());
+        departamento.setImagenUrl(request.getImagenUrl());
         return departamentoRepository.save(departamento);
     }
 
     public Departamento actualizar(Long id, DepartamentoRequest request) {
         Departamento departamento = buscarPorId(id);
         departamento.setNombre(request.getNombre());
+        departamento.setImagenUrl(request.getImagenUrl());
         return departamentoRepository.save(departamento);
     }
 

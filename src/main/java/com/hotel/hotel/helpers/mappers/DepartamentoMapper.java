@@ -19,6 +19,7 @@ public class DepartamentoMapper {
         DepartamentoResponse response = new DepartamentoResponse();
         response.setId(departamento.getId());
         response.setNombre(departamento.getNombre());
+        response.setImagenUrl(departamento.getImagenUrl());
         return response;
     }
 

@@ -16,6 +16,8 @@ public class Departamento {
 
     private String detalle;
 
+    private String imagenUrl;
+
     public Long getId() {
         return id;
     }
@@ -38,5 +40,13 @@ public class Departamento {
 
     public void setDetalle(String detalle) {
         this.detalle = detalle;
+    }
+
+    public String getImagenUrl() {
+        return imagenUrl;
+    }
+
+    public void setImagenUrl(String imagenUrl) {
+        this.imagenUrl = imagenUrl;
     }
 }
